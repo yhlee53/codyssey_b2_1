@@ -23,8 +23,8 @@ def main():
 
     # search
     sub_search = sub.add_parser("search")
-    sub_search.add_argument("--from")
-    sub_search.add_argument("--to")
+    sub_search.add_argument("--from", dest="from_date")
+    sub_search.add_argument("--to", dest="to_date")
     sub_search.add_argument("--category")
     sub_search.add_argument("--type")
     sub_search.add_argument("--q")
@@ -71,8 +71,8 @@ def main():
     sub_export = sub.add_parser("export")
     sub_export.add_argument("--out", required=True)
     sub_export.add_argument("--month")
-    sub_export.add_argument("--from")
-    sub_export.add_argument("--to")
+    sub_export.add_argument("--from", dest="from_date")
+    sub_export.add_argument("--to", dest="to_date")
 
     args = parser.parse_args()
     data_dir = args.data_dir
@@ -125,7 +125,7 @@ def main():
                 break
 
     elif args.cmd == "search":
-        for tx in svc.search(from_date=args.from, to_date=args.to, category=args.category, type_=args.type, q=args.q, tag=args.tag):
+        for tx in svc.search(from_date=args.from_date, to_date=args.to_date, category=args.category, type_=args.type, q=args.q, tag=args.tag):
             print(f"{tx.id} | {tx.date} | {tx.type} | {tx.category} | {tx.amount} | {tx.memo} | {','.join(tx.tags)}")
 
     elif args.cmd == "update":
@@ -212,11 +212,11 @@ def main():
             for tx in tx_repo.stream():
                 if start <= tx.date < end:
                     rows.append(tx)
-        elif args.from or args.to:
+        elif args.from_date or args.to_date:
             for tx in tx_repo.stream():
-                if args.from and tx.date < args.from:
+                if args.from_date and tx.date < args.from_date:
                     continue
-                if args.to and tx.date > args.to:
+                if args.to_date and tx.date > args.to_date:
                     continue
                 rows.append(tx)
         else:
