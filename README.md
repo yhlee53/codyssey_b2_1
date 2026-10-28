@@ -27,26 +27,39 @@ CSV import/export 스키마 (UTF-8, 헤더 포함)
   2024-01-15,expense,food,15000,점심,meal,lunch
 
 주요 명령 및 옵션
-- add
+- 1. add
   - 대화형으로 거래 추가 (date, type, category, amount, memo, tags)
-- list --limit N
+- 2. list --limit N
   - 최신순 거래 출력 (기본 limit=10)
-- search --from YYYY-MM-DD --to YYYY-MM-DD --category NAME --type income|expense --q KEYWORD --tag TAG
-  - 조건 기반 검색
-- update --id TX-000001 [--date ...] [--type ...] [--category ...] [--amount ...] [--memo ...] [--tags a,b]
-  - 옵션 기반 수정
-- delete --id TX-000001
-  - 거래 삭제
-- category add | list | remove --name NAME [--replacement NAME]
-  - 카테고리 관리 (삭제 시 사용 중이면 replacement로 대체하거나 삭제 차단)
-- budget set --month YYYY-MM --amount AMOUNT
-  - 월 예산 설정
-- summary --month YYYY-MM --top N
+- 3. search --from YYYY-MM-DD --to YYYY-MM-DD --category NAME --type income|expense --q KEYWORD --tag TAG
+- 4. summary --month YYYY-MM --top N
   - 월별 요약 (총수입/총지출/잔액 + 카테고리별 지출 TOP N), 예산 사용률/초과 표시
-- export --out FILE.csv --month YYYY-MM
-  - 또는 --from YYYY-MM-DD --to YYYY-MM-DD
-- import --from FILE.csv
+- 5. budget set --month YYYY-MM --amount AMOUNT
+  - 월 예산 설정
+- 6. category add | list | remove --name NAME [--replacement NAME]
+  - 카테고리 관리 (삭제 시 사용 중이면 replacement로 대체하거나 삭제 차단)
+  - python -m budget_app category remove --name aaa
+- 7. update --id TX-000001 [--date ...] [--type ...] [--category ...] [--amount ...] [--memo ...] [--tags a,b]
+  - 옵션 기반 수정
+- 8. delete --id TX-000001
+  - 거래 삭제
+- 9. export --out FILE.csv --month YYYY-MM
+    - 또는 --from YYYY-MM-DD --to YYYY-MM-DD
+- 9. import --from FILE.csv
   - CSV 파일에서 거래 일괄 등록 (스키마 준수 필요)
+- 10. 추가 조건(최종 결과물의 필수 구성)
+  기본 데이터 폴더 및 파일
+  - 기본 데이터 폴더: ./data (--data-dir 옵션으로 변경 가능)
+  - 저장 파일(영구 저장, JSONL 포맷):
+    - ./data/transactions.jsonl
+    - ./data/categories.jsonl
+    - ./data/budgets.jsonl
+
+  CSV import/export 스키마 (UTF-8, 헤더 포함)
+  - 컬럼: date,type,category,amount,memo,tags
+  - 예:
+    date,type,category,amount,memo,tags
+    2024-01-15,expense,food,15000,점심,meal,lunch
 
 설계/구조 요약
 - 모듈 분리: cli.py, services.py, storage.py, models.py, decorators.py, utils.py
