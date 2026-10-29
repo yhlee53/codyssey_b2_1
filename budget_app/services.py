@@ -44,18 +44,19 @@ class BudgetService:
     def list_transactions(self, limit: int = 10) -> Iterator[Transaction]:
         """최신순으로 거래를 순회하는 제너레이터를 반환한다.
 
-        전체 거래 목록을 메모리에 한 번에 적재하지 않고, `reversed()`를 사용해
-        최신 거래부터 순회한다.
+        전체 거래 목록을 메모리에 한 번에 적재하지 않고, 저장소의 스트림을 직접 순회한다.
         """
-        # latest first
-        for tx in reversed(self.tx_repo.all()):
+        n = 0
+        for tx in self.tx_repo.stream():
+            if n >= limit:
+                break
             yield tx
+            n += 1
 
     def search(self, from_date: Optional[str] = None, to_date: Optional[str] = None, category: Optional[str] = None, type_: Optional[str] = None, q: Optional[str] = None, tag: Optional[str] = None) -> Iterator[Transaction]:
         """조건에 맞는 거래를 필터링해 반환하는 검색 제너레이터.
 
-        각 거래에 대해 날짜 범위, 카테고리, 유형, 메모 키워드, 태그를 검사해
-        매칭되는 항목만 순회한다.
+        전체 데이터 로드 없이 저장소의 stream()을 순회하면서 조건에 맞는 거래만 yield한다.
         """
         def match(tx: Transaction) -> bool:
             """단일 거래가 검색 조건에 맞는지 확인한다."""
@@ -76,7 +77,7 @@ class BudgetService:
                     return False
             return True
 
-        for tx in reversed(self.tx_repo.all()):
+        for tx in self.tx_repo.stream():
             if match(tx):
                 yield tx
 

@@ -19,3 +19,18 @@
 {"id": "TX-000019", "type": "expense", "date": "2026-10-07", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
 {"id": "TX-000020", "type": "expense", "date": "2026-10-08", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
 {"id": "TX-000021", "type": "expense", "date": "2026-10-09", "amount": 20000, "category": "rent", "memo": "모니터", "tags": ["모니터", "2inch"]}
+{"id": "TX-000022", "type": "income", "date": "2026-10-01", "amount": 1000000, "category": "salary", "memo": "10월 급여", "tags": ["월", "급여"]}
+{"id": "TX-000023", "type": "expense", "date": "2026-10-05", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000024", "type": "expense", "date": "2026-10-06", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000025", "type": "expense", "date": "2026-10-07", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000026", "type": "expense", "date": "2026-10-08", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000027", "type": "expense", "date": "2026-10-09", "amount": 20000, "category": "rent", "memo": "모니터", "tags": ["모니터", "2inch"]}
+{"id": "TX-000028", "type": "income", "date": "2026-10-01", "amount": 1000000, "category": "salary", "memo": "10월 급여", "tags": ["월", "급여"]}
+{"id": "TX-000029", "type": "expense", "date": "2026-10-05", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000030", "type": "expense", "date": "2026-10-06", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000031", "type": "income", "date": "2026-10-01", "amount": 1000000, "category": "salary", "memo": "10월 급여", "tags": ["월", "급여"]}
+{"id": "TX-000032", "type": "expense", "date": "2026-10-05", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000033", "type": "expense", "date": "2026-10-06", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000034", "type": "income", "date": "2026-10-01", "amount": 1000000, "category": "salary", "memo": "10월 급여", "tags": ["월", "급여"]}
+{"id": "TX-000035", "type": "expense", "date": "2026-10-05", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
+{"id": "TX-000036", "type": "expense", "date": "2026-10-06", "amount": 10000, "category": "food", "memo": "점심식대", "tags": ["식대", "점심"]}
