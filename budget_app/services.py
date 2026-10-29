@@ -1,3 +1,9 @@
+"""가계부 비즈니스 로직을 담당하는 서비스 계층입니다.
+
+CLI에서 일어난 사용자 요청을 받아, 거래 생성, 검색, 월별 집계 같은
+도메인 규칙을 구현한다.
+"""
+
 from typing import List, Optional, Iterator, Tuple
 from .models import Transaction
 from .storage import TransactionRepository, CategoryStore, BudgetStore
@@ -6,22 +12,53 @@ import datetime
 
 
 class BudgetService:
+    """거래/카테고리/예산을 조합해 비즈니스 로직을 수행하는 서비스 클래스.
+
+    저장소 계층에 대한 의존성을 받아, 사용자 기능에 필요한 도메인 로직을
+    캡슐화한다.
+    """
+
     def __init__(self, tx_repo: TransactionRepository, cat_store: CategoryStore, budget_store: BudgetStore):
+        """서비스가 사용할 데이터 저장소들을 주입받아 초기화한다."""
         self.tx_repo = tx_repo
         self.cat_store = cat_store
         self.budget_store = budget_store
 
     def add_transaction(self, type_: str, date: str, category: str, amount: int, memo: str, tags: List[str]) -> Transaction:
+        """새 거래를 생성해 저장소에 추가하고 생성된 객체를 반환한다.
+
+        Args:
+            type_: 거래 유형 (`income` 또는 `expense`)
+            date: 거래 일자 (`YYYY-MM-DD`)
+            category: 카테고리 이름
+            amount: 거래 금액
+            memo: 메모
+            tags: 태그 목록
+
+        Returns:
+            저장된 Transaction 객체
+        """
         tx = Transaction(id="", type=type_, date=date, amount=amount, category=category, memo=memo, tags=tags)
         return self.tx_repo.add(tx)
 
     def list_transactions(self, limit: int = 10) -> Iterator[Transaction]:
+        """최신순으로 거래를 순회하는 제너레이터를 반환한다.
+
+        전체 거래 목록을 메모리에 한 번에 적재하지 않고, `reversed()`를 사용해
+        최신 거래부터 순회한다.
+        """
         # latest first
         for tx in reversed(self.tx_repo.all()):
             yield tx
 
     def search(self, from_date: Optional[str] = None, to_date: Optional[str] = None, category: Optional[str] = None, type_: Optional[str] = None, q: Optional[str] = None, tag: Optional[str] = None) -> Iterator[Transaction]:
+        """조건에 맞는 거래를 필터링해 반환하는 검색 제너레이터.
+
+        각 거래에 대해 날짜 범위, 카테고리, 유형, 메모 키워드, 태그를 검사해
+        매칭되는 항목만 순회한다.
+        """
         def match(tx: Transaction) -> bool:
+            """단일 거래가 검색 조건에 맞는지 확인한다."""
             if from_date:
                 if tx.date < from_date:
                     return False
@@ -44,6 +81,10 @@ class BudgetService:
                 yield tx
 
     def summary(self, month: str, top: int = 3) -> Tuple[int, int, int, List[Tuple[str,int]] , Optional[int]]:
+        """지정된 월의 시계열 요약 정보를 계산한다.
+
+        총 수입, 총 지출, 잔액, 상위 카테고리 지출 금액, 월 예산을 함께 반환한다.
+        """
         # returns total_income, total_expense, balance, top_categories, budget_amount
         ys, ms = month.split("-")
         start = f"{ys}-{ms}-01"

@@ -1,3 +1,9 @@
+"""콘솔 기반 가계부 애플리케이션의 CLI 진입점입니다.
+
+이 모듈은 사용자가 입력한 명령어를 파싱하고, 저장소/서비스와 연결하여
+거래 추가, 목록 조회, 검색, 예산 설정, CSV import/export 등 모든 사용자 상호작용을 처리합니다.
+"""
+
 import argparse
 from .storage import TransactionRepository, CategoryStore, BudgetStore
 from .services import BudgetService
@@ -10,6 +16,11 @@ DATA_DIR = "./data"
 
 @handle_errors
 def main():
+    """CLI 애플리케이션의 메인 실행 함수.
+
+    argparse로 명령어를 정의하고, 각 하위 명령마다 해당 로직을 분기해 실행한다.
+    사용자 입력값 검증, 데이터 저장소 초기화, 서비스 호출, 결과 출력까지 전체 흐름을 담당한다.
+    """
     parser = argparse.ArgumentParser(prog="budget_app")
     parser.add_argument("--data-dir", default=DATA_DIR)
     sub = parser.add_subparsers(dest="cmd")
@@ -86,6 +97,11 @@ def main():
     svc = BudgetService(tx_repo, cat_store, bud_store)
 
     if args.cmd == "add":
+        """사용자로부터 거래 정보를 입력받아 저장하는 핸들러.
+
+        날짜, 유형, 카테고리, 금액, 메모, 태그를 순서대로 입력받고,
+        각 입력값 유효성을 검증한 뒤 TransactionRepository.add()를 호출한다.
+        """
         date = input("날짜(YYYY-MM-DD): ").strip()
         if not parse_date(date):
             print("[오류] 날짜 형식이 올바르지 않습니다 (YYYY-MM-DD).\n[힌트] 예: 2024-01-15")
@@ -117,6 +133,11 @@ def main():
         print(f"[저장 완료] id={tx.id}")
 
     elif args.cmd == "list":
+        """최신순으로 거래 목록을 제한 수만큼 출력한다.
+
+        BudgetService.list_transactions()는 최신 거래 우선으로 정렬된 iterator를 반환하고,
+        limit 값에 따라 출력 수를 제한한다.
+        """
         n = 0
         for tx in svc.list_transactions(limit=args.limit):
             print(f"{tx.id} | {tx.date} | {tx.type} | {tx.category} | {tx.amount} | {tx.memo} | {','.join(tx.tags)}")
@@ -125,10 +146,18 @@ def main():
                 break
 
     elif args.cmd == "search":
+        """조건에 맞는 거래를 검색해 출력한다.
+
+        날짜 범위, 카테고리, 타입, 키워드, 태그 조건을 조합해 필터링한다.
+        """
         for tx in svc.search(from_date=args.from_date, to_date=args.to_date, category=args.category, type_=args.type, q=args.q, tag=args.tag):
             print(f"{tx.id} | {tx.date} | {tx.type} | {tx.category} | {tx.amount} | {tx.memo} | {','.join(tx.tags)}")
 
     elif args.cmd == "update":
+        """기존 거래의 일부 필드만 수정한다.
+
+        전달된 인자만 변경하고, 없는 값은 그대로 유지한다.
+        """
         tags = None
         if args.tags:
             tags = [t.strip() for t in args.tags.split(",") if t.strip()]
@@ -140,6 +169,11 @@ def main():
             sys.exit(1)
 
     elif args.cmd == "delete":
+        """거래를 삭제한다.
+
+        ID가 존재하면 파일을 재작성하여 해당 거래를 제거하고,
+        없으면 오류를 출력한다.
+        """
         ok = tx_repo.delete(args.id)
         if ok:
             print(f"[삭제 완료] id={args.id}")
@@ -148,6 +182,11 @@ def main():
             sys.exit(1)
 
     elif args.cmd == "category":
+        """카테고리 관리 명령을 처리한다.
+
+        add/list/remove 하위 명령을 통해 카테고리를 추가, 조회, 삭제한다.
+        삭제 시에는 거래가 사용 중인 경우 대체값 혹은 차단 로직을 적용한다.
+        """
         if args.subcmd == "add":
             name = input("카테고리명: ").strip()
             if cat_store.add(name):
@@ -171,6 +210,10 @@ def main():
             sys.exit(1)
 
     elif args.cmd == "budget":
+        """예산 관련 명령을 처리한다.
+
+        현재는 `set`만 구현되어 있으며, 월별 예산 값을 저장한다.
+        """
         if args.subcmd == "set":
             bud_store.set(args.month, args.amount)
             print(f"[저장 완료] {args.month} 예산 {args.amount}원")
@@ -179,6 +222,10 @@ def main():
             sys.exit(1)
 
     elif args.cmd == "summary":
+        """해당 월의 수입/지출/잔액과 상위 카테고리 요약을 출력한다.
+
+        `BudgetService.summary()`에서 계산된 값을 받아 사용자에게 읽기 쉬운 포맷으로 보여준다.
+        """
         income, expense, balance, top_cats, budget_amount = svc.summary(args.month, top=args.top)
         if income == 0 and expense == 0 and not top_cats:
             print("데이터 없음")
@@ -196,6 +243,11 @@ def main():
             print(f"{i}) {c} {format_currency(s)}")
 
     elif args.cmd == "export":
+        """선택한 기간의 거래를 CSV로 내보낸다.
+
+        `--month` 또는 `--from/--to` 조건으로 거래를 필터링하고,
+        헤더를 포함한 CSV 파일을 UTF-8로 저장한다.
+        """
         out = args.out
         import csv
         fields = ["date", "type", "category", "amount", "memo", "tags"]
@@ -230,6 +282,11 @@ def main():
         print(f"[완료] {out} ({len(rows)} records)")
 
     elif args.cmd == "import":
+        """CSV 파일에서 거래를 읽어 일괄 추가한다.
+
+        `DictReader`로 CSV 헤더를 읽고 필수 컬럼을 검증한 뒤,
+        유효한 레코드만 `BudgetService.add_transaction()`으로 저장한다.
+        """
         path = args.fromfile
         import csv
         imported = 0

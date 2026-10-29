@@ -29,24 +29,81 @@ CSV import/export 스키마 (UTF-8, 헤더 포함)
 주요 명령 및 옵션
 - 1. add
   - 대화형으로 거래 추가 (date, type, category, amount, memo, tags)
+    python -m budget_app add           
+      날짜(YYYY-MM-DD): 2026-10-09
+      타입(income/expense): expense
+      카테고리:  rent
+      금액(양수): 20000
+      메모(선택, 엔터로 생략): 모니터
+      태그(쉼표로 구분, 엔터로 생략): 모니터, 20inch
+      [저장 완료] id=TX-000021
+
 - 2. list --limit N
   - 최신순 거래 출력 (기본 limit=10)
+    python -m budget_app list --limit 5                 
+      TX-000020 | 2026-10-08 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000019 | 2026-10-07 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000018 | 2026-10-06 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000017 | 2026-10-05 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000016 | 2026-09-05 | expense | food | 10000 | 점심식대 | 식대,점심
+
 - 3. search --from YYYY-MM-DD --to YYYY-MM-DD --category NAME --type income|expense --q KEYWORD --tag TAG
+    python -m budget_app search --from 2026-10-01 --to 2026-10-06  
+      TX-000018 | 2026-10-06 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000017 | 2026-10-05 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000009 | 2026-10-01 | income | salary | 1000000 | 10월 급여 | 월,급여
+    python -m budget_app search --from 2026-10-01 --to 2026-10-06 --category food --type expense --q 점 --tag 식대
+      TX-000018 | 2026-10-06 | expense | food | 10000 | 점심식대 | 식대,점심
+      TX-000017 | 2026-10-05 | expense | food | 10000 | 점심식대 | 식대,점심
+
 - 4. summary --month YYYY-MM --top N
   - 월별 요약 (총수입/총지출/잔액 + 카테고리별 지출 TOP N), 예산 사용률/초과 표시
+    python -m budget_app summary --month 2026-10 --top 5 
+      총 수입: 1,000,000원
+      총 지출: 60,000원
+      잔액: 940,000원
+      예산: 50,000원 (사용률 120.0%) (초과)
+
+      지출 TOP 5
+      1) food 40,000원
+      2) rent 20,000원
+
 - 5. budget set --month YYYY-MM --amount AMOUNT
   - 월 예산 설정
+    python -m budget_app budget set --month 2026-03 --amount 55000
+      [저장 완료] 2026-03 예산 55000원
+
 - 6. category add | list | remove --name NAME [--replacement NAME]
   - 카테고리 관리 (삭제 시 사용 중이면 replacement로 대체하거나 삭제 차단)
-  - python -m budget_app category remove --name aaa
+    python -m budget_app category add           
+      카테고리명: aaa
+      [저장 완료] category=aaa
+    python -m budget_app category remove --name aaa
+      [삭제 완료] category=aaa
+    python -m budget_app category remove --name food
+      [오류] 삭제 불가: 'food' 카테고리를 사용하는 거래가 존재합니다.
+      [힌트] 해당 카테고리를 삭제하려면 먼저 사용하는 거래의 카테고리를 변경하거나 --replacement로 대체 카테고리를 지정하세요.
+
 - 7. update --id TX-000001 [--date ...] [--type ...] [--category ...] [--amount ...] [--memo ...] [--tags a,b]
   - 옵션 기반 수정
+    python -m budget_app update --id TX-000001 --date 2026-10-25 --type expense --category shopping --amount 42000 --memo "생활용품 구매" --tags home,necessity
+      [수정 완료] id=TX-000001
+
 - 8. delete --id TX-000001
   - 거래 삭제
+    python -m budget_app delete --id TX-000001
+      [삭제 완료] id=TX-000001
+
 - 9. export --out FILE.csv --month YYYY-MM
-    - 또는 --from YYYY-MM-DD --to YYYY-MM-DD
+  - 또는 --from YYYY-MM-DD --to YYYY-MM-DD
+    python -m budget_app export --out FILE1.csv --month 2026-10       
+      [완료] FILE1.csv (6 records)
+
 - 9. import --from FILE.csv
   - CSV 파일에서 거래 일괄 등록 (스키마 준수 필요)
+    python -m budget_app import --from FILE1.csv
+      [완료] imported=6, skipped=0
+
 - 10. 추가 조건(최종 결과물의 필수 구성)
   기본 데이터 폴더 및 파일
   - 기본 데이터 폴더: ./data (--data-dir 옵션으로 변경 가능)
